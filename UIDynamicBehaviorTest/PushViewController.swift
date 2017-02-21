@@ -22,6 +22,15 @@ class PushViewController: UIViewController {
         return view
     }()
     
+    lazy var segmented: UISegmentedControl = {
+        let seg = UISegmentedControl()
+        seg.translatesAutoresizingMaskIntoConstraints = false
+        seg.insertSegment(withTitle: "beh 1", at: 0, animated: false)
+        seg.insertSegment(withTitle: "beh 2", at: 1, animated: false)
+        seg.selectedSegmentIndex = 0
+        return seg
+    } ()
+    
     lazy var animator: UIDynamicAnimator = {
         UIDynamicAnimator(referenceView: self.view)
     }()
@@ -53,7 +62,7 @@ class PushViewController: UIViewController {
         rope.fillColor = UIColor.clear.cgColor
         rope.lineJoin = kCALineCapRound
         rope.lineWidth = 2
-        rope.strokeColor = UIColor.black.cgColor
+        rope.strokeColor = UIColor.orange.cgColor
         rope.strokeEnd = 1
         self.view.layer.addSublayer(rope)
         return rope
@@ -63,10 +72,21 @@ class PushViewController: UIViewController {
         super.viewDidLoad()
 
         view.addSubview(box)
+        view.addSubview(segmented)
+        
+        segmented.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        segmented.centerYAnchor.constraint(equalTo: view.bottomAnchor, constant: -40).isActive = true
+        
         
         let pan = UIPanGestureRecognizer(target: self, action: #selector(addPan(pan:)))
         view.addGestureRecognizer(pan)
+        
+        box.addObserver(self, forKeyPath: "center", options: .new, context: nil)
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
     }
     
     // MARK: - Methods
@@ -75,12 +95,31 @@ class PushViewController: UIViewController {
         let point = pan.location(in: view)
         let state = pan.state
         
-        //behavior1With(point: point, state: state)
+        if segmented.selectedSegmentIndex == 0 {
+            behavior1With(point: point, state: state)
+        } else {
+            behavior2With(point: point, state: state)
+        }
+    
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
-        behavior2With(point: point, state: state)
+        guard segmented.selectedSegmentIndex == 0 else {
+            rope.path = nil
+            return
+        }
         
-
-}
+        let path = UIBezierPath()
+        path.move(to: view.center)
+        path.addLine(to: box.center)
+        rope.path = path.cgPath
+        
+    }
+    
+    deinit {
+        box.removeObserver(self, forKeyPath: "center")
+    }
 
     func behavior1With(point: CGPoint, state: UIGestureRecognizerState) {
         switch state {
@@ -89,10 +128,6 @@ class PushViewController: UIViewController {
             print ("")
         case .changed:
             box.center = point
-            let path = UIBezierPath()
-            path.move(to: view.center)
-            path.addLine(to: box.center)
-            rope.path = path.cgPath
             print ("")
         case .ended:
             var distance = sqrt(pow(view.center.x - point.x, 2) + pow(view.center.y - point.y, 2))
@@ -137,5 +172,7 @@ class PushViewController: UIViewController {
             print ("")
         }
     }
+    
+    
 
 }
