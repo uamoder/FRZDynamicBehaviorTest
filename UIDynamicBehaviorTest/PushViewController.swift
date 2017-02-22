@@ -82,7 +82,7 @@ class PushViewController: UIViewController {
         view.addGestureRecognizer(pan)
         
         box.addObserver(self, forKeyPath: "center", options: .new, context: nil)
-        // Do any additional setup after loading the view.
+
     }
     
     override func viewDidAppear(_ animated: Bool) {
