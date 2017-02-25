@@ -168,6 +168,8 @@ class PushViewController: UIViewController {
             animator.addBehavior(push)
             animator.addBehavior(collision)
             print ("")
+        case .cancelled:
+            print ("")
         default:
             print ("")
         }
